@@ -2,12 +2,38 @@ import type { RequestOptions } from 'https';
 import Request, { BearerAuth, RequestData } from './request';
 import { Region, RegionUS } from './regions';
 import { SendEmailRequest } from './api/requests';
+import { Filter } from './types';
+import { isEmpty, MissingParamError } from './utils';
 
 type APIDefaults = RequestOptions & { region: Region; url?: string };
 
 type Recipients = Record<string, unknown>;
 
 type BroadcastsAllowedRecipientFieldsKeys = keyof typeof BROADCASTS_ALLOWED_RECIPIENT_FIELDS;
+
+export enum DeliveryExportMetric {
+  Created = 'created',
+  Attempted = 'attempted',
+  Sent = 'sent',
+  Delivered = 'delivered',
+  Opened = 'opened',
+  Clicked = 'clicked',
+  Converted = 'converted',
+  Bounced = 'bounced',
+  Spammed = 'spammed',
+  Unsubscribed = 'unsubscribed',
+  Dropped = 'dropped',
+  Failed = 'failed',
+  Undeliverable = 'undeliverable',
+}
+
+export type DeliveryExportRequestOptions = {
+  start?: number;
+  end?: number;
+  attributes?: string[];
+  metric?: DeliveryExportMetric;
+  drafts?: boolean;
+};
 
 const BROADCASTS_ALLOWED_RECIPIENT_FIELDS = {
   ids: ['ids', 'id_ignore_missing'],
@@ -67,6 +93,42 @@ export class APIClient {
     }
 
     return this.request.post(`${this.apiRoot}/api/campaigns/${id}/triggers`, payload);
+  }
+
+  listExports() {
+    return this.request.get(`${this.apiRoot}/exports`);
+  }
+
+  getExport(id: string | number) {
+    if (isEmpty(id)) {
+      throw new MissingParamError('id');
+    }
+
+    return this.request.get(`${this.apiRoot}/exports/${id}`);
+  }
+
+  downloadExport(id: string | number) {
+    if (isEmpty(id)) {
+      throw new MissingParamError('id');
+    }
+
+    return this.request.get(`${this.apiRoot}/exports/${id}/download`);
+  }
+
+  createCustomersExport(filters: Filter) {
+    if (isEmpty(filters)) {
+      throw new MissingParamError('filters');
+    }
+
+    return this.request.post(`${this.apiRoot}/exports/customers`, { filters });
+  }
+
+  createDeliveriesExport(newsletterId: number, options?: DeliveryExportRequestOptions) {
+    if (isEmpty(newsletterId)) {
+      throw new MissingParamError('newsletterId');
+    }
+
+    return this.request.post(`${this.apiRoot}/exports/deliveries`, { newsletter_id: newsletterId, ...options });
   }
 }
 

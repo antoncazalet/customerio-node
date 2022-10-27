@@ -1,17 +1,10 @@
 import type { RequestOptions } from 'https';
 import Request, { BasicAuth, RequestData, PushRequestData } from './request';
 import { Region, RegionUS } from './regions';
-import { isEmpty } from './utils';
+import { isEmpty, MissingParamError } from './utils';
 import { IdentifierType } from './types';
 
 type TrackDefaults = RequestOptions & { region: Region; url?: string };
-
-class MissingParamError extends Error {
-  constructor(param: string) {
-    super(param);
-    this.message = `${param} is required`;
-  }
-}
 
 export class TrackClient {
   siteid: BasicAuth['siteid'];
@@ -74,10 +67,10 @@ export class TrackClient {
       throw new MissingParamError('data.name');
     }
 
-    let payload = { ...data};
+    let payload = { ...data };
 
     if (!isEmpty(anonymousId)) {
-      payload["anonymous_id"] = anonymousId;
+      payload['anonymous_id'] = anonymousId;
     }
 
     return this.request.post(`${this.trackRoot}/events`, payload);
