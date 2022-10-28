@@ -95,9 +95,9 @@ cio.destroy(1);
 
 - **id**: String or number (required)
 
-#### Attention! 
+#### Attention!
 
-This method will only delete a person and not suppress them. This means they can be readded. 
+This method will only delete a person and not suppress them. This means they can be readded.
 If you need to suppress a person, please use [`cio.suppress`](https://github.com/customerio/customerio-node#ciosuppressid).
 
 ---
@@ -173,7 +173,7 @@ cio.trackAnonymous(anonymous_id, {
 
 #### Anonymous invite events
 
-If you previously sent [invite events](https://customer.io/docs/anonymous-invite-emails/), you can achieve the same functionality by sending an anonymous event with an empty string for the anonymous identifier. To send anonymous invites, your event *must* include a `recipient` attribute. 
+If you previously sent [invite events](https://customer.io/docs/anonymous-invite-emails/), you can achieve the same functionality by sending an anonymous event with an empty string for the anonymous identifier. To send anonymous invites, your event _must_ include a `recipient` attribute.
 
 ```javascript
 cio.trackAnonymous("", {
@@ -346,6 +346,83 @@ api.triggerBroadcast(1, { name: "foo" }, { emails: ["example@emails.com"], email
 - **id**: String or number (required)
 - **data**: Object (optional)
 - **recipients**: Object (optional)
+
+### api.listExports()
+
+Return a list of your exports. Exports are point-in-time people or campaign metrics.
+
+```javascript
+api.listExports();
+```
+
+### api.getExport(export_id)
+
+Return information about a specific export.
+
+```javascript
+api.getExport(1);
+```
+
+#### Options
+
+- **export_id**: String or number (required)
+
+### api.downloadExport(export_id)
+
+This endpoint returns a signed link to download an export. The link expires after 15 minutes.
+
+```javascript
+api.downloadExport(1);
+```
+
+#### Options
+
+- **export_id**: String or number (required)
+
+### api.createCustomersExport(filters)
+
+Provide filters and attributes describing the customers you want to export. This endpoint returns export metadata; use the /exports/{export_id}/endpoint to download your export.
+
+```javascript
+api.createCustomersExport({
+  filters: {
+    and: [
+      {
+        segment: {
+          id: 3,
+        },
+      },
+    ],
+  },
+});
+```
+
+#### Options
+
+- **filters**: Object (required)
+
+You can read more about the filter object syntax on the [export customer data](https://customer.io/docs/api/#operation/exportPeopleData) docs.
+
+### api.createDeliveriesExport(newsletter_id, options)
+
+Provide filters and attributes describing the customers you want to export. This endpoint returns export metadata; use the /exports/{export_id}/endpoint to download your export.
+
+```javascript
+api.createDeliveriesExport(1, {
+  start: 1666950084,
+  end: 1666950084,
+  attributes: ["attr_one"],
+  metric: "attempted",
+  drafts: false,
+});
+```
+
+#### Options
+
+- **newsletter_id**: String or number (required)
+- **options**: Object
+
+You can read more about the available options on the [export deliveries data](https://customer.io/docs/api/#operation/exportDeliveriesData) docs.
 
 ## Further examples
 
